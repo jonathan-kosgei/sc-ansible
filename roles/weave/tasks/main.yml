@@ -1,0 +1,20 @@
+- name: download weave binary
+  command: "curl -L git.io/weave -o /usr/local/bin/weave"
+
+- name: chmod weave bin
+  command: "chmod +x /usr/local/bin/weave"
+
+- name: /opt/cni/bin
+  file: path=/opt/cni/bin state=directory owner=root
+
+- name: /etc/cni/net.d
+  file: path=/etc/cni/net.d state=directory owner=root
+
+- name: weave setup
+  command: weave setup
+
+- name: weave launch
+  command: weave launch {% for host in groups['weave'] %} {{ host }} {% endfor %}
+
+- name: weave expose
+  command: weave expose

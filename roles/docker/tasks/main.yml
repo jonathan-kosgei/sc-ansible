@@ -1,0 +1,4 @@
+---
+
+- name: run docker install script
+  script: docker.sh creates=/lib/systemd/system/docker.service

@@ -1,0 +1,4 @@
+---
+- hosts: ingress
+  roles:
+     - minions

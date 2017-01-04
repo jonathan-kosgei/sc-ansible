@@ -1,0 +1,9 @@
+- name: install glusterfs
+  apt: name=glusterfs-server state=present
+
+- name: Connect to Gluster peers.
+  shell: "gluster peer probe {{ item }}"
+  register: gluster_peer_probe
+  changed_when: "'already in peer list' not in gluster_peer_probe.stdout"
+  failed_when: false
+  with_items: "{{ groups.glusterfs }}"

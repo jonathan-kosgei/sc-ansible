@@ -1,0 +1,29 @@
+- name: get etcd & etcdctl bins
+  command: "{{ item }}"
+  with_items:
+  - wget --quiet https://github.com/coreos/etcd/releases/download/{{ etcd_version }}-rc.0/etcd-{{ etcd_version }}-rc.0-linux-amd64.tar.gz
+  - tar xzvf etcd-{{ etcd_version }}-rc.0-linux-amd64.tar.gz
+  - mv ./etcd-{{ etcd_version }}-rc.0-linux-amd64/etcd ./etcd-{{ etcd_version }}-rc.0-linux-amd64/etcdctl /usr/bin
+  - rm -f ./etcd-{{ etcd_version }}-rc.0-linux-amd64.tar.gz
+  - rm -rf ./etcd-{{ etcd_version }}-rc.0-linux-amd64
+  tags: etcd
+  args:
+    creates: /usr/bin/etcd
+
+- name: /var/lib/etcd
+  file: path=/var/lib/etcd state=directory
+  tags: etcd
+
+- name: /etc/etcd
+  file: path=/etc/etcd state=directory
+  tags: etcd
+
+- name: /lib/systemd/system/etcd.service
+  template: src=templates/etcd.service.j2 dest=/lib/systemd/system/etcd.service
+  notify:
+    - start etcd service
+  tags: etcd
+
+- name: /etc/etcd/etcd.conf
+  template: src=templates/etcd.conf.j2 dest=/etc/etcd/etcd.conf
+  tags: etcd

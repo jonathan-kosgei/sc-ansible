@@ -1,0 +1,2 @@
+ environment_config:
+   ETCD_AUTHORITY: "{{ kube_master }}:6666"

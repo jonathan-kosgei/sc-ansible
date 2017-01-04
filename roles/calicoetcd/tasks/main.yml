@@ -1,0 +1,14 @@
+- name: run calico etcd container
+  docker:
+    name: calico-etcd
+    image: gcr.io/google_containers/etcd:2.2.1
+    state: reloaded
+    ports:
+    - "0.0.0.0:6666:6666"    
+    volumes:
+    - "/varetcd:/mnt/master-pd/var/etcd"
+    publish_all_ports: true
+    command: /bin/sh -c '/usr/local/bin/etcd --name=calicoetcd --data-dir=/var/etcd/calico-data --advertise-client-urls=http://{{ kube_master }}:6666 --listen-client-urls=http://0.0.0.0:6666 --listen-peer-urls=http://0.0.0.0:6660'
+# Better way to run container so that there's no naming conflict, test service'
+# Create group vars with the etcd_authority different for the master and the minions or just skip it make sure calicoctl is on master
+# with chmod + since I only have to run calicoctl pool add 192.168.0.0/16 --nat-outgoing

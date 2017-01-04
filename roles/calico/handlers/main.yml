@@ -1,0 +1,3 @@
+---
+- name: start calico-node service
+  service: name=calico-node state=started

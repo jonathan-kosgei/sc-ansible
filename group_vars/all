@@ -1,0 +1,8 @@
+---
+# file: group_vars/all
+kube_master: 172.27.0.68
+kubernetes_version: v1.3.4
+cluster_dns: 10.254.0.10
+kubernetes_bin_download_url: https://github.com/jonathan-kosgei/kubernetes-bins/blob/master/{{kubernetes_version}}
+
+# group variables into masters, minions, all

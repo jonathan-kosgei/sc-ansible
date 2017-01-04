@@ -1,0 +1,4 @@
+---
+- hosts: kube.minions
+  roles:
+     - minions

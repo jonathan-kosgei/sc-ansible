@@ -1,0 +1,58 @@
+- name: download calicoctl
+  get_url: url=https://github.com/projectcalico/calico-containers/releases/download/{{ calico_node_version }}/calicoctl dest=/usr/bin/calicoctl force=no
+
+- name: /etc/environment
+  file: path=/etc/environment owner=root
+
+- name: set env
+  command: 'echo ETCD_AUTHORITY="{{ etcd_authority }}" >> /etc/environment'
+
+- name: pull an image
+  docker_image:
+    name: calico/node:{{ calico_node_version }}
+
+- name: chmod calicoctl
+  command: "chmod +x /usr/bin/calicoctl"
+
+- name: /opt/cni/bin
+  file: path=/opt/cni/bin state=directory owner=root
+
+- name: /etc/cni/net.d
+  file: path=/etc/cni/net.d state=directory owner=root
+
+- name: /etc/rkt/net.d
+  file: path=/etc/rkt/net.d state=directory owner=root
+
+- name: /etc/cni/net.d/10-calico.conf
+  template: src=templates/10-calico.conf.j2 dest=/etc/cni/net.d/10-calico.conf
+
+- name: /etc/rkt/net.d/10-calico.conf
+  template: src=templates/10-calico.conf.j2 dest=/etc/rkt/net.d/10-calico.conf
+
+- name: /etc/network-environment
+  template: src=templates/network-environment.j2 dest=/etc/network-environment
+
+- name: download calico bin
+  get_url: url=https://github.com/projectcalico/calico-cni/releases/download/{{ calico_plugin_version }}/calico dest=/opt/cni/bin/calico force=no
+
+- name: download calico bin
+  get_url: url=https://github.com/projectcalico/calico-cni/releases/download/{{ calico_plugin_version }}/calico-ipam dest=/opt/cni/bin/calico-ipam force=no
+
+- name: chmod calico
+  command: chmod +x /opt/cni/bin/calico
+
+- name: chmod calico-ipam
+  command: chmod +x /opt/cni/bin/calico-ipam
+
+- name: /lib/systemd/system/calico-node.service
+  template: src=templates/calico-node.service.j2 dest=/lib/systemd/system/calico-node.service
+  notify:
+    - start calico-node service
+
+#- name: calicoctl pool add 192.168.0.0/16 --ipip --nat-outgoing
+#  command: "export ETCD_AUTHORITY={{ etcd_authority }} "
+
+#- name: calicoctl pool add 192.168.0.0/16 --ipip --nat-outgoing
+#  command: "calicoctl pool add 192.168.0.0/16 --ipip --nat-outgoing"
+#  environment:
+#    ETCD_AUTHORITY: "{{etcd_authority}}"

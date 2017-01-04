@@ -1,0 +1,45 @@
+# file: staging
+# The files in group_vars correlate to a group here, so future me don't delete the all:children group cause 
+# I've set a bunch of variables in group_vars/all
+
+[all:children]
+kube.masters
+kube.minions
+
+[kube.masters]
+#172.1.1.4
+172.27.0.68
+
+[kube.minions]
+#172.1.2.4
+#172.1.2.5
+#172.1.3.4
+#172.1.1.4
+172.27.0.69
+172.27.0.71
+172.27.0.70
+172.27.0.67
+
+[ingress]
+#sc-ingress-0.cloudapp.net
+172.27.0.70
+
+#[gatewayed]
+#172.1.2.5
+#172.1.2.4
+#172.1.1.4
+#172.1.0.5
+
+[weave]
+#172.1.2.4
+#172.1.2.5
+#172.1.3.5
+172.27.0.69
+172.27.0.71
+172.27.0.70
+
+[glusterfs]
+#172.1.2.4
+#172.1.2.5
+172.27.0.69
+172.27.0.71

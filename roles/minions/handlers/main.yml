@@ -1,0 +1,7 @@
+---
+# file: roles/common/handlers/main.yml
+- name: start kubelet service
+  service: name=kubelet state=started enabled=yes
+
+- name: start kube-proxy service
+  service: name=kube-proxy state=started enabled=yes

@@ -1,0 +1,102 @@
+- name: download kube-apiserver
+  get_url: url={{kubernetes_bin_download_url}}/kube-apiserver?raw=true dest=/usr/bin/kube-apiserver force=no
+
+- name: download kube-controller-manager
+  get_url: url={{kubernetes_bin_download_url}}/kube-controller-manager?raw=true dest=/usr/bin/kube-controller-manager force=no
+
+- name: download kube-scheduler
+  get_url: url={{kubernetes_bin_download_url}}/kube-scheduler?raw=true dest=/usr/bin/kube-scheduler force=no
+
+- name: download kubectl
+  get_url: url={{kubernetes_bin_download_url}}/kubectl?raw=true dest=/usr/bin/kubectl  force=no
+
+- name: chmod +x /usr/bin/kube-apiserver
+  command: chmod +x /usr/bin/kube-apiserver
+
+- name: chmod +x /usr/bin/kube-controller-manager
+  command: chmod +x /usr/bin/kube-controller-manager
+
+- name: chmod +x /usr/bin/kube-scheduler
+  command: chmod +x /usr/bin/kube-scheduler
+
+- name: chmod +x /usr/bin/kubectl
+  command: chmod +x /usr/bin/kubectl
+
+- name: /etc/kubernetes
+  file: path=/etc/kubernetes state=directory owner=root
+
+- name: create user kube
+  user: name=kube comment="Kubernetes User"
+
+- name: ssl fix
+  command: openssl genrsa -out /etc/kubernetes/serviceaccount.key 2048
+
+- name: /etc/kubernetes/apiserver
+  template: src=apiserver.j2 dest=/etc/kubernetes/apiserver
+  tags: kube-apiserver
+
+- name: /etc/kubernetes/config
+  template: src=config.j2 dest=/etc/kubernetes/config
+
+- name: /etc/kubernetes/controller-manager
+  template: src=controller-manager.j2 dest=/etc/kubernetes/controller-manager
+  tags: kube-controller-manager
+
+- name: /etc/kubernetes/scheduler
+  template: src=scheduler.j2 dest=/etc/kubernetes/scheduler
+  tags: kube-scheduler
+
+- name: /lib/systemd/system/kube-apiserver.service
+  template: src=templates/kube-apiserver.service.j2 dest=/lib/systemd/system/kube-apiserver.service
+  tags: kube-apiserver
+
+- name: /lib/systemd/system/kube-controller-manager.service
+  template: src=templates/kube-controller-manager.service.j2 dest=/lib/systemd/system/kube-controller-manager.service
+  tags: kube-controller-manager
+
+- name: /lib/systemd/system/kube-scheduler.service
+  template: src=templates/kube-scheduler.service.j2 dest=/lib/systemd/system/kube-scheduler.service
+  tags: kube-scheduler
+
+- name: make sure etcd started
+  service: name=etcd state=started enabled=yes
+
+- name: start kube-apiserver service
+  service: name=kube-apiserver state=started enabled=yes
+
+- name: start kube-controller-manager service
+  service: name=kube-controller-manager state=started enabled=yes
+
+- name: start kube-scheduler service
+  service: name=kube-scheduler state=started enabled=yes
+
+- name: /etc/kubernetes/kube-namespace.yml
+  template: src=kube-namespace.yml.j2 dest=/etc/kubernetes/kube-namespace.yml
+
+#- name: create kube-system namespace
+#  command: kubectl create -f /etc/kubernetes/kube-namespace.yml
+
+- name: /etc/kubernetes/kube-dns.yml
+  template: src=kube-dns.yml.j2 dest=/etc/kubernetes/kube-dns.yml
+
+# add conditionals
+#- name: create dns pod
+#  command: kubectl create -f /etc/kubernetes/kube-dns.yml
+
+#- name: kubectl cordon master
+#  command: kubectl cordon {{ kube_master }}
+
+#- name: kubectl cordon ingress
+#  command: kubectl cordon 172.1.3.4
+
+#- name: /etc/kubernetes/glusterfs-endpoints.yml
+#  template: src=glusterfs-endpoints.yml.j2 dest=/etc/kubernetes/glusterfs-endpoints.yml
+
+#- name: create glusterfs-endpoints
+#  command: kubectl create -f /etc/kubernetes/glusterfs-endpoints.yml
+
+#- name: /etc/kubernetes/glusterfs-endpoints-service.yml
+#  template: src=glusterfs-endpoints-service.yml.j2 dest=/etc/kubernetes/glusterfs-endpoints-service.yml
+
+#- name: create glusterfs-endpoints service namespace
+#  command: kubectl create -f /etc/kubernetes/glusterfs-endpoints-service.yml

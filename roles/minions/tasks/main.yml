@@ -1,0 +1,47 @@
+- name: download kubelet
+  get_url: url={{kubernetes_bin_download_url}}/kubelet?raw=true dest=/usr/bin/kubelet force=no mode=0755
+
+- name: download kube-proxy
+  get_url: url={{kubernetes_bin_download_url}}/kube-proxy?raw=true dest=/usr/bin/kube-proxy force=no mode=0755
+
+#- name: chmod +x /usr/bin/kubelet
+#  command: chmod +x /usr/bin/kubelet
+
+#- name: chmod +x /usr/bin/kube-proxy
+#  command: chmod +x /usr/bin/kube-proxy
+
+- name: /etc/kubernetes
+  file: path=/etc/kubernetes state=directory owner=root
+
+- name: /var/lib/kubelet
+  file: path=/var/lib/kubelet state=directory owner=root
+
+- name: create user kube
+  user: name=kube comment="Kubernetes User"
+  
+- name: /etc/kubernetes/worker-kubeconfig.yaml
+  template: src=worker-kubeconfig.yaml.j2 dest=/etc/kubernetes/worker-kubeconfig.yaml
+  tags: kubelet
+
+- name: /etc/kubernetes/config
+  template: src=config.j2 dest=/etc/kubernetes/config
+
+- name: /etc/kubernetes/kubelet
+  template: src=kubelet.j2 dest=/etc/kubernetes/kubelet
+  tags: kubelet
+
+- name: /etc/kubernetes/proxy
+  template: src=proxy.j2 dest=/etc/kubernetes/proxy
+  tags: kube-proxy
+
+- name: /lib/systemd/system/kubelet.service
+  template: src=templates/kubelet.service.j2 dest=/lib/systemd/system/kubelet.service
+  notify:
+    - start kubelet service
+  tags: kubelet
+
+- name: /lib/systemd/system/kube-proxy.service
+  template: src=templates/kube-proxy.service.j2 dest=/lib/systemd/system/kube-proxy.service
+  notify:
+    - start kube-proxy service
+  tags: kube-proxy
